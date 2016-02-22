@@ -1,38 +1,49 @@
 package com.example.abhinandansharma.contentprovider;
 
-import android.support.v7.app.ActionBarActivity;
+
+import android.app.Activity;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.provider.ContactsContract;
+import android.widget.TextView;
 
+public class MainActivity extends Activity {
 
-public class MainActivity extends ActionBarActivity {
+    /** Called when the activity is first created. */
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    }
+        TextView contactView = (TextView) findViewById(R.id.contactview);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+        Cursor cursor = getContacts();
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        while (cursor.moveToNext()) {
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+            String displayName = cursor.getString(cursor
+                    .getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+            contactView.append("Name: ");
+            contactView.append(displayName);
+            contactView.append("\n");
         }
-
-        return super.onOptionsItemSelected(item);
     }
+
+    private Cursor getContacts() {
+        // Run query
+        Uri uri = ContactsContract.Contacts.CONTENT_URI;
+        String[] projection = new String[] { ContactsContract.Contacts._ID,
+                ContactsContract.Contacts.DISPLAY_NAME };
+        String selection = ContactsContract.Contacts.IN_VISIBLE_GROUP + " = '"
+                + ("1") + "'";
+        String[] selectionArgs = null;
+        String sortOrder = ContactsContract.Contacts.DISPLAY_NAME
+                + " COLLATE LOCALIZED ASC";
+
+
+        return managedQuery(uri, projection, selection, selectionArgs,
+                sortOrder);
+    }
+
 }
